@@ -1,14 +1,59 @@
 "use client";
 
-import { assets } from "@/data";
 import { useRouter } from "next/navigation";
-import React from "react";
+import React, { useEffect, useState } from "react";
 
-const RepairTable = () => {
+// Define the types for asset data structure
+interface MaintenanceLog {
+  status: string;
+  issue: string;
+  date: string;
+  _id: string;
+}
+
+interface HistoryLog {
+  maintenanceLog: MaintenanceLog[];
+  userHistory: any[]; // Add specific type if you have a structure for userHistory
+}
+
+interface Asset {
+  _id: string;
+  serialNo: string;
+  category: string;
+  status: string;
+  brand: string;
+  model: string;
+  configuration: Record<string, string>; // Configuration is an object with key-value pairs
+  historyLog: HistoryLog;
+  __v: number;
+}
+
+const RepairTable: React.FC = () => {
   const router = useRouter();
-  const handleRowClick = (serialNo: string, category: string) => {
-    router.push(`/asset-inventory/${category}/history-log//${serialNo}`);
+
+  const handleRowClick = (serialNo: string, category: string): void => {
+    router.push(`/asset-inventory/${category}/history-log/${serialNo}`);
   };
+
+  const [assets, setAssets] = useState<Asset[] | null>(null); // Specify the state type
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await fetch("http://localhost:8000/asset");
+        if (!response.ok) {
+          throw new Error("Failed to fetch data");
+        }
+        const data = await response.json();
+        setAssets(data.data); // Assign data to the state
+      } catch (error: any) {
+        console.error(error.message); // Handle errors
+      }
+    };
+
+    fetchData();
+  }, []);
+
   return (
     <div className="relative overflow-x-auto shadow-md sm:rounded-lg md:mx-6 md:mt-12">
       <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
@@ -50,26 +95,19 @@ const RepairTable = () => {
             >
               Update Status
             </th>
-            {/* <th scope="col" className="px-6 py-3">
-                <span className="sr-only">Edit</span>
-              </th> */}
           </tr>
         </thead>
         <tbody>
-          {
-            // data
-            //   .flatMap((user) => user.assets)
-            //   .filter((asset) => asset.category === "cpu")
+          {assets &&
             assets
-              .filter((asset) => asset.status === "in repair")
+              .filter((asset) => asset.status === "In Repair")
               .map((item, index) => (
-                // <Link href={`/cpu/${item.serialNo}`}>
                 <tr
-                  // onClick={() => handleRowClick(item.serialNo)}
+                  key={item._id}
                   className="bg-white border-b dark:bg-gray-800 dark:border-gray-700"
                 >
                   <td className="px-6 py-4 whitespace-nowrap text-center">
-                    {index}
+                    {index + 1} {/* Use 1-based index */}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-center">
                     {item.serialNo}
@@ -79,8 +117,9 @@ const RepairTable = () => {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-center">
                     {item.historyLog.maintenanceLog
-                      .filter((item) => item.status === "in-repair")
-                      .map((item) => item.issue)}
+                      .filter((log) => log.status === "In Repair")
+                      .map((log) => log.issue)
+                      .join(", ")}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-center">
                     {item.brand}
@@ -89,8 +128,8 @@ const RepairTable = () => {
                     {item.model}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-center">
-                    {item.otherConfig ? (
-                      Object.entries(item.otherConfig).map(
+                    {item.configuration ? (
+                      Object.entries(item.configuration).map(
                         ([key, value], idx) => (
                           <div key={idx}>
                             <strong>{key}:</strong> {value}
@@ -98,14 +137,14 @@ const RepairTable = () => {
                         )
                       )
                     ) : (
-                      <span>No Config</span> // Fallback in case otherConfig is undefined
+                      <span>No Config</span> // Fallback in case configuration is undefined
                     )}
                   </td>
                   <td
                     className="px-6 py-4 whitespace-nowrap text-center dark:hover:text-white underline cursor-pointer"
                     onClick={() => handleRowClick(item.serialNo, item.category)}
                   >
-                    Histoty log
+                    History log
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-center">
                     QR Code
@@ -127,9 +166,7 @@ const RepairTable = () => {
                     </div>
                   </td>
                 </tr>
-                // </Link>
-              ))
-          }
+              ))}
         </tbody>
       </table>
     </div>
