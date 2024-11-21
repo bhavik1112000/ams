@@ -26,7 +26,7 @@ const RecentActivities = () => {
 
   return (
     <div className="mt-12">
-      <h1 className="text-4xl font-bold">Recent Activities</h1>
+      <h1 className="text-3xl font-bold">Recent Activities</h1>
       <div className="mt-8 rounded-md dark:bg-gray-800 dark:border-gray-700 bg-white border border-gray-200">
         {recentLogs && recentLogs.length > 0 ? (
           recentLogs.map((log, index) => {
