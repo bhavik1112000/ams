@@ -3,6 +3,8 @@
 import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 
+import { BACKEND_URL } from "@/config";
+
 // Define the types for asset data structure
 interface MaintenanceLog {
   status: string;
@@ -37,22 +39,46 @@ const RepairTable: React.FC = () => {
 
   const [assets, setAssets] = useState<Asset[] | null>(null); // Specify the state type
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await fetch("http://localhost:8000/asset");
-        if (!response.ok) {
-          throw new Error("Failed to fetch data");
-        }
-        const data = await response.json();
-        setAssets(data.data); // Assign data to the state
-      } catch (error: any) {
-        console.error(error.message); // Handle errors
+  const fetchData = async () => {
+    try {
+      const response = await fetch(`${BACKEND_URL}/asset`);
+      if (!response.ok) {
+        throw new Error("Failed to fetch data");
       }
-    };
+      const data = await response.json();
+      setAssets(data.data); // Assign data to the state
+    } catch (error: any) {
+      console.error(error.message); // Handle errors
+    }
+  };
 
+  useEffect(() => {
     fetchData();
   }, []);
+
+  const fixItem = async (itemId: string) => {
+    try {
+      await fetch(`${BACKEND_URL}/asset/fix/${itemId}`, {
+        method: "PUT",
+      });
+    } catch (error: any) {
+      console.error(error.message); // Handle errors
+    }
+
+    fetchData();
+  };
+
+  const scrapItem = async (itemId: string) => {
+    try {
+      await fetch(`${BACKEND_URL}/asset/scrap/${itemId}`, {
+        method: "PUT",
+      });
+    } catch (error: any) {
+      console.error(error.message); // Handle errors
+    }
+
+    fetchData();
+  };
 
   return (
     <div className="relative overflow-x-auto shadow-md sm:rounded-lg md:mx-6 md:mt-12">
@@ -153,12 +179,14 @@ const RepairTable: React.FC = () => {
                     <div className="flex gap-3 items-center">
                       <button
                         type="button"
+                        onClick={() => fixItem(item._id)}
                         className="text-white bg-green-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-green-800 dark:hover:bg-green-700 focus:outline-none dark:focus:ring-blue-800"
                       >
                         Fixed
                       </button>
                       <button
                         type="button"
+                        onClick={() => scrapItem(item._id)}
                         className="text-white bg-red-700 hover:bg-red-700 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-red-900 dark:hover:bg-red-800 focus:outline-none dark:focus:ring-blue-800"
                       >
                         Scrap
