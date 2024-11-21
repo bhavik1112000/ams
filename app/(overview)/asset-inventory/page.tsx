@@ -13,7 +13,8 @@ const Page = () => {
     <>
       <Search />
       <div className="p-6 md:p-12">
-        <div className="relative grid grid-cols-3 lg:grid-cols-4 gap-3 flex-wrap">
+        <h1 className="text-4xl font-bold">Asset Categories</h1>
+        <div className="mt-8 relative grid grid-cols-3 lg:grid-cols-4 gap-3 flex-wrap">
           {assetRecord.map((asset) => (
             <Card
               id={asset.category}
