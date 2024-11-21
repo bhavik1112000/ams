@@ -30,7 +30,7 @@ const RecentActivities = () => {
         recentLogs.map((log, index) => {
           return (
             log.historyLog.maintenanceLog.length > 0 && (
-              <div className="flex border-b py-3  dark:border-gray-600 text-sm">
+              <div className="flex border-b px-8 py-3 dark:border-gray-600">
                 <div className="w-[100%] mx-8">{log.serialNo}</div>
                 {log.historyLog.maintenanceLog[0].date && (
                   <div className="w-[100%]">
@@ -45,7 +45,7 @@ const RecentActivities = () => {
                 <div className="w-[100%] mx-8">{log.category}</div>
                 <div
                   className={clsx(
-                    "max-w-[90px] w-[100%] text-center bg-green-700 bg-opacity-60 rounded-full border-green-900 h-[100%] my-auto",
+                    "max-w-[120px] w-[100%] text-center bg-green-700 bg-opacity-60 rounded-full border-green-900 h-[100%] py-[2px] my-auto",
                     {
                       "bg-red-700 border-red-900": log.status === "In Repair",
                     }
